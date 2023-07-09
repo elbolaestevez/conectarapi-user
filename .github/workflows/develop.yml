@@ -41,13 +41,13 @@ jobs:
 
       - name: Push image to AWS Lightsail
         run: >
-          aws lightsail push-container-image --region us-east-1 --service-name conectarapi-user --label latest --image conectarapi-user:latest
+          aws lightsail push-container-image --region sa-east-1 --service-name conectarapi-user --label latest --image conectarapi-user:latest
           > push-output.txt
 
       - name: Trigger a new deploy in AWS Lightsail
         run: |
           IMAGE_REFERENCE=$(grep 'Refer to this image as' push-output.txt | awk -F'"' '{print $2}')
-          aws lightsail create-container-service-deployment --region us-east-1 --service-name conectarapi-user --containers '{
+          aws lightsail create-container-service-deployment --region sa-east-1 --service-name conectarapi-user --containers '{
             "conectarapi-user-container": {
               "image": "'"$IMAGE_REFERENCE"'",
               "ports": {
