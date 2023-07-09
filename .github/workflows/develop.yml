@@ -1,0 +1,55 @@
+name: Deploy to AWS Lightsail
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # - name: Run tests
+      #   run: python -m pytest
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Build Docker Image
+        run: docker build -t fastapi_conectar_user .
+
+      - name: Push image to AWS Lightsail
+        run: >
+          aws lightsail push-container-image --region us-east-1 --service-name fastapi_conectar_user --label latest --image fastapi_conectar_user:latest
+          > push-output.txt
+
+      - name: Trigger a new deploy in AWS Lightsail
+        run: |
+          IMAGE_REFERENCE=$(grep 'Refer to this image as' push-output.txt | awk -F'"' '{print $2}')
+          aws lightsail create-container-service-deployment --region us-east-1 --service-name fastapi_conectar_user --containers '{
+            "fastapi_conectar_user-container": {
+              "image": "'"$IMAGE_REFERENCE"'",
+              "ports": {
+                "80": "HTTP"
+              }
+            }
+          }'
+        shell: bash
