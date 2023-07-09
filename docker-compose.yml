@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: mi_app_fastapi
+    image: mi-app-fastapi
     volumes:
       - ./:/app
     ports:
