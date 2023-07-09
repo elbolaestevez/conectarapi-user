@@ -34,21 +34,21 @@ jobs:
           aws-region: sa-east-1
 
       - name: Install AWS Lightsail Plugin
-        run: curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "/usr/local/bin/lightsailctl" && sudo chmod +x /usr/local/bin/lightsailctl    
+        run: curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "/usr/local/bin/lightsailctl" && sudo chmod +x /usr/local/bin/lightsailctl
 
       - name: Build Docker Image
-        run: docker build -t fastapi_conectar_user .
+        run: docker build -t conectarapi_user .
 
       - name: Push image to AWS Lightsail
         run: >
-          aws lightsail push-container-image --region us-east-1 --service-name fastapi_conectar_user --label latest --image fastapi_conectar_user:latest
+          aws lightsail push-container-image --region us-east-1 --service-name conectarapi_user --label latest --image conectarapi_user:latest
           > push-output.txt
 
       - name: Trigger a new deploy in AWS Lightsail
         run: |
           IMAGE_REFERENCE=$(grep 'Refer to this image as' push-output.txt | awk -F'"' '{print $2}')
-          aws lightsail create-container-service-deployment --region us-east-1 --service-name fastapi_conectar_user --containers '{
-            "fastapi_conectar_user-container": {
+          aws lightsail create-container-service-deployment --region us-east-1 --service-name conectarapi_user --containers '{
+            "conectarapi_user-container": {
               "image": "'"$IMAGE_REFERENCE"'",
               "ports": {
                 "80": "HTTP"
