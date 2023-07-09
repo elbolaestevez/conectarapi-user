@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  fastapi_conectar_user:
+  conectarapi-user:
     build:
       context: .
       dockerfile: Dockerfile
