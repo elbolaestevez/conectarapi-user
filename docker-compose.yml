@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  fastapi_conectar_user:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: mi_app_fastapi
+    volumes:
+      - ./:/app
+    ports:
+      - 4000:8000
