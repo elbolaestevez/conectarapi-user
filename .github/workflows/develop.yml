@@ -1,4 +1,4 @@
-name: Conexión a EC2 con SSH
+name: Conectar a instancia EC2
 
 on:
   push:
@@ -6,21 +6,17 @@ on:
       - develop
 
 jobs:
-  deploy:
+  connect:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout código fuente
         uses: actions/checkout@v2
 
-      - name: Conectar a EC2 y desplegar
-        uses: appleboy/ssh-action@master
-        with:
-          host: 18.229.135.176
-          username: ec2-user
-          key: ${{ secrets.SSH_SECRET2 }}
-          script: |
-            # Comandos a ejecutar en la instancia de EC2
-            echo "¡Conexión exitosa!"
-            # Ejemplo adicional: ejecutar un comando de shell en la instancia
-            ssh ec2-user@18.229.135.176 "ls -al"
+      - name: Conectar a instancia EC2
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openssh-client
+          echo "${{ secrets.SSH_SECRET }}" > key.pem
+          chmod 600 key.pem
+          ssh -i key.pem ec2-user@18.229.135.176
