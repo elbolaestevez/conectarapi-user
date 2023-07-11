@@ -1,11 +1,11 @@
 version: "3.8"
 
 services:
-  fastapi_conectar_user:
+  conectarapi-user:
     build:
       context: .
       dockerfile: Dockerfile
-    image: mi_app_fastapi
+    image: mi-app-fastapi
     volumes:
       - ./:/app
     ports:
