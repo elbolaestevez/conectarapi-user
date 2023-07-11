@@ -3,7 +3,7 @@ name: Conexión a EC2 con SSH
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
   deploy:
