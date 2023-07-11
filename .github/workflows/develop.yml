@@ -1,19 +1,31 @@
-name: Conectar a instancia EC2
+name: Ejecutar Docker en instancia EC2
 
 on:
   push:
     branches:
-      - develop
+      - main
 
 jobs:
-  connect:
+  run_docker:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Conectar a instancia EC2
+      - name: Checkout del código fuente
+        uses: actions/checkout@v2
+
+      - name: Configurar credenciales de AWS
         run: |
-          sudo apt-get update
-          sudo apt-get install -y openssh-client
-          echo "${{ secrets.SSH_SECRET }}" > key.pem
-          chmod 600 key.pem
-          ssh -i key.pem ec2-user@18.229.135.176
+          echo "[default]" >> ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+          echo "[default]" >> ~/.aws/config
+          echo "region=${{ secrets.AWS_REGION }}" >> ~/.aws/config
+
+      - name: Construir imagen de Docker
+        run: |
+          docker build -t mi-app-fastapi .
+          docker images
+
+      - name: Conectar a instancia EC2 y ejecutar Docker
+        run: |
+          ssh -i conectar-api-key-pairs.pem ec2-user@18.229.135.176 "docker run mi-app-fastapi"
