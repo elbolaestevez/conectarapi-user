@@ -3,7 +3,7 @@ name: Conectar a EC2
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
   deploy:
@@ -21,4 +21,4 @@ jobs:
         run: |
           docker build -t mi-app-fastapi .
           docker run -d --name conectarapi_user mi-app-fastapi
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_SECRET }} ec2-user@18.229.135.176 "docker stop conectarapi_user"
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${{ secrets.SSH_SECRET }} ec2-user@18.229.135.176 "docker stop conectarapi_user"
