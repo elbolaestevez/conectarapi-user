@@ -13,12 +13,6 @@ jobs:
       - name: Checkout código fuente
         uses: actions/checkout@v2
 
-      - name: Configurar credenciales de AWS
-        run: |
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set default.region ${{ secrets.AWS_REGION }}
-
       - name: Conectar a EC2 y desplegar
         uses: appleboy/ssh-action@master
         with:
