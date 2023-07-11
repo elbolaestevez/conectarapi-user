@@ -1,24 +1,24 @@
-name: Conectar a EC2
+name: Conexión a EC2 con SSH
 
 on:
   push:
     branches:
-      - develop
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código fuente
-        uses: actions/checkout@v2
-
-      - name: Conectar a EC2 y desplegar
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Configurar entorno SSH
         run: |
-          docker build -t mi-app-fastapi .
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_SECRET }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa <EC2-INSTANCE-IP> >> ~/.ssh/known_hosts
+
+      - name: Conectar a la instancia EC2
+        run: |
+          docker build -t mi-app-fastapi 
           docker run -d --name conectarapi_user mi-app-fastapi
-          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${{ secrets.SSH_SECRET }} ec2-user@18.229.135.176 "docker stop conectarapi_user"
+          ssh -i ~/.ssh/id_rsa ec2-user@18.229.135.176 "docker stop conectarapi_user"
