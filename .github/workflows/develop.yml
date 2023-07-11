@@ -10,15 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Configurar entorno SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_SECRET }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -t rsa 18.229.135.176 >> ~/.ssh/known_hosts
+      - name: Checkout código fuente
+        uses: actions/checkout@v2
 
-      - name: Conectar a la instancia EC2
-        run: |
-          docker build -t mi-app-fastapi .
-          docker run -d --name conectarapi_user mi-app-fastapi
-          ssh -i ~/.ssh/id_rsa ec2-user@18.229.135.176 "docker stop conectarapi_user"
+      - name: Conectar a EC2 y desplegar
+        uses: appleboy/ssh-action@master
+        with:
+          host: 18.229.135.176
+          username: ec2-user
+          key: ${{ secrets.SSH_SECRET }}
+          script: |
+            # Comandos a ejecutar en la instancia de EC2
+            echo "¡Conexión exitosa!"
+            # Ejemplo adicional: ejecutar un comando de shell en la instancia
+            ssh ec2-user@18.229.135.176 "ls -al"
