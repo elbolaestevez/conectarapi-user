@@ -13,19 +13,20 @@ jobs:
       - name: Checkout código fuente
         uses: actions/checkout@v2
 
-      - name: Conectar a EC2 y desplegar
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          
-      - name: Install SSH Key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SSH_SECRET }}
-          known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
-          
+      - name: Configurar credenciales de AWS
         run: |
-          docker build -t mi-app-fastapi .
-          docker run -d --name conectarapi_user mi-app-fastapi
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_SECRET }} ec2-user@18.229.135.176 "docker stop conectarapi_user"
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set default.region ${{ secrets.AWS_REGION }}
+
+      - name: Conectar a EC2 y desplegar
+        uses: appleboy/ssh-action@master
+        with:
+          host: 18.229.135.176
+          username: ec2-user
+          key: ${{ secrets.SSH_SECRET }}
+          script: |
+            # Comandos a ejecutar en la instancia de EC2
+            echo "¡Conexión exitosa!"
+            # Ejemplo adicional: ejecutar un comando de shell en la instancia
+            ssh ec2-user@18.229.135.176 "ls -al"
