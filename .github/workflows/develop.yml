@@ -10,9 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código fuente
-        uses: actions/checkout@v2
-
       - name: Conectar a instancia EC2
         run: |
           sudo apt-get update
