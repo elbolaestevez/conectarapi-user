@@ -15,10 +15,10 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_SECRET }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -t rsa <EC2-INSTANCE-IP> >> ~/.ssh/known_hosts
+          ssh-keyscan -t rsa 18.229.135.176 >> ~/.ssh/known_hosts
 
       - name: Conectar a la instancia EC2
         run: |
-          docker build -t mi-app-fastapi 
+          docker build -t mi-app-fastapi .
           docker run -d --name conectarapi_user mi-app-fastapi
           ssh -i ~/.ssh/id_rsa ec2-user@18.229.135.176 "docker stop conectarapi_user"
