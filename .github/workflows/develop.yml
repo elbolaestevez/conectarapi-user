@@ -13,12 +13,14 @@ jobs:
       - name: Checkout código fuente
         uses: actions/checkout@v2
 
-      - name: Conectar a EC2 y desplegar
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          docker build -t mi-app-fastapi .
-          docker run -d --name conectarapi_user mi-app-fastapi
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_SECRET }} ec2-user@18.229.135.176 "docker stop conectarapi_user"
+      - name: SSH into EC2 instance
+        uses: appleboy/ssh-action@master
+        with:
+          host: 18.229.135.176
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker stop your-container-name || true
+            docker rm your-container-name || true
+            docker pull your-docker-image-tag
+            docker run -d --name your-container-name -p 8000:8000 your-docker-image-tag
