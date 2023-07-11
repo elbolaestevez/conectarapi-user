@@ -22,5 +22,5 @@ jobs:
           docker build -t mi-app-fastapi .
           docker run -d --name conectarapi_user mi-app-fastapi
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
-          chmod 600 key.pem
+          chmod 0400 key.pem
           ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@18.229.135.176 "docker stop conectarapi_user"
