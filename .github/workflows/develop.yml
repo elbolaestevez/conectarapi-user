@@ -3,7 +3,7 @@ name: Ejecutar Docker en instancia EC2
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
   run_docker:
