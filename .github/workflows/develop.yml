@@ -18,7 +18,7 @@ jobs:
         with:
           host: 18.229.135.176
           username: ec2-user
-          key: ${{ secrets.SSH_SECRET }}
+          key: ${{ secrets.SSH_SECRET2 }}
           script: |
             # Comandos a ejecutar en la instancia de EC2
             echo "¡Conexión exitosa!"
