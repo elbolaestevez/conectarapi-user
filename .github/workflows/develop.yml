@@ -1,4 +1,4 @@
-name: Conexión a EC2 con SSH
+name: Conectar a instancia EC2
 
 on:
   push:
@@ -6,19 +6,17 @@ on:
       - develop
 
 jobs:
-  deploy:
+  connect:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Configurar entorno SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_SECRET }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -t rsa 18.229.135.176 >> ~/.ssh/known_hosts
+      - name: Checkout código fuente
+        uses: actions/checkout@v2
 
-      - name: Conectar a la instancia EC2
+      - name: Conectar a instancia EC2
         run: |
-          docker build -t mi-app-fastapi .
-          docker run -d --name conectarapi_user mi-app-fastapi
-          ssh -i ~/.ssh/id_rsa ec2-user@18.229.135.176 "docker stop conectarapi_user"
+          sudo apt-get update
+          sudo apt-get install -y openssh-client
+          echo "${{ secrets.SSH_SECRET }}" > key.pem
+          chmod 600 key.pem
+          ssh -i key.pem ec2-user@18.229.135.176
