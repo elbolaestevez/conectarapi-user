@@ -1,4 +1,4 @@
-name: Conectar a EC2
+name: Ejecutar Docker en instancia EC2
 
 on:
   push:
@@ -6,21 +6,26 @@ on:
       - main
 
 jobs:
-  deploy:
+  run_docker:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código fuente
+      - name: Checkout del código fuente
         uses: actions/checkout@v2
 
-      - name: SSH into EC2 instance
-        uses: appleboy/ssh-action@master
-        with:
-          host: 18.229.135.176
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            docker stop your-container-name || true
-            docker rm your-container-name || true
-            docker pull your-docker-image-tag
-            docker run -d --name your-container-name -p 8000:8000 your-docker-image-tag
+      - name: Configurar credenciales de AWS
+        run: |
+          echo "[default]" >> ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+          echo "[default]" >> ~/.aws/config
+          echo "region=${{ secrets.AWS_REGION }}" >> ~/.aws/config
+
+      - name: Construir imagen de Docker
+        run: |
+          docker build -t mi-app-fastapi .
+          docker images
+
+      - name: Conectar a instancia EC2 y ejecutar Docker
+        run: |
+          ssh -i conectar-api-key-pairs.pem ec2-user@18.229.135.176 "docker run mi-app-fastapi"
