@@ -1,58 +1,24 @@
-name: Deploy to AWS Lightsail
+name: Conectar a EC2
 
 on:
   push:
-    branches: [develop]
+    branches:
+      - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout código fuente
+        uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      # - name: Run tests
-      #   run: python -m pytest
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: sa-east-1
-
-      - name: Install AWS Lightsail Plugin
-        run: curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "/usr/local/bin/lightsailctl" && sudo chmod +x /usr/local/bin/lightsailctl
-
-      - name: Build Docker Image
-        run: docker build -t conectarapi-user .
-
-      - name: Push image to AWS Lightsail
-        run: >
-          aws lightsail push-container-image --region sa-east-1 --service-name conectarapi-user --label latest --image conectarapi-user:latest
-          > push-output.txt
-
-      - name: Trigger a new deploy in AWS Lightsail
+      - name: Conectar a EC2 y desplegar
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          IMAGE_REFERENCE=$(grep 'Refer to this image as' push-output.txt | awk -F'"' '{print $2}')
-          aws lightsail create-container-service-deployment --region sa-east-1 --service-name conectarapi-user --containers '{
-            "conectarapi-user-container": {
-              "image": "'"$IMAGE_REFERENCE"'",
-              "ports": {
-                "80": "HTTP"
-              }
-            }
-          }'
-        shell: bash
+          docker build -t mi-app-fastapi .
+          docker run -d --name conectarapi_user mi-app-fastapi
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_SECRET }} ec2-user@18.229.135.176 "docker stop conectarapi_user"
